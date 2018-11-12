@@ -61,6 +61,24 @@ impl Block {
     }
 }
 
+impl PartialEq for Block {
+    fn eq(&self, other: &Self) -> bool {
+        if self.x != other.x || self.y != other.y {
+            return false;
+        }
+
+        for i in 0..self.data.len() {
+            if self.data[i] != other.data[i] {
+                return false;
+            }
+        }
+
+        true
+    }
+}
+
+impl Eq for Block {}
+
 #[cfg(test)]
 mod block_test {
     use super::*;
