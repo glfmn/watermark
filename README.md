@@ -4,7 +4,7 @@ Watermark images using k-means to embedd the watermark.
 
 ## Contributing
 
-Please set up the `pre-commit` hook using
+Set up and use the `pre-commit` hook which automates testing each time you commit with:
 
 ```
 $ ln -s ../../.pre-commit.sh .git/hooks/pre-commit
