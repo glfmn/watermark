@@ -7,4 +7,4 @@ authors = ["Gwen Lofman <Gwen@Lofman.io>"]
 image = "0.20"
 clap = "^2.32"
 rayon = "1.0"
-rand = "0.5"
+rand = "0.6"

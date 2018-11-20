@@ -58,7 +58,7 @@ fn main() {
 
     let mut image = image::open(image).expect("Unable to open image").to_luma();
     let (width, height) = image.dimensions();
-    let _mark = image::open(mark).expect("Unable to open watermark").to_luma();
+    let mark = image::open(mark).expect("Unable to open watermark").to_luma();
 
     let blocks = Block::from_image(&mut image);
 
@@ -149,10 +149,53 @@ fn main() {
     }
     let median = median[median.len()/2];
 
-    // Use the median to convert the variance to a spectral matrix
-    variance
+    // Use the median to convert the variance to a polarities matrix
+    let variance: Vec<u8> = variance
         .par_iter_mut()
-        .for_each(|v| *v = if *v < median {0.} else {1.});
+        .map(|v| if *v < median {0u8} else {1u8})
+        .collect();
 
-    println!("{}", output);
+    // Create a permutation key and permuted watermark
+    let mut rng = thread_rng();
+    let (mark_width, mark_height) = mark.dimensions();
+    let watermark: Vec<u8> = mark.into_raw().par_iter().map(|x| if *x > 0 {1} else {0}).collect();
+    let mut permuted = watermark.clone();
+
+    let mut key_1: Vec<u8> = Vec::with_capacity(watermark.len());
+    let mut row_permute = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+    for r in 0..mark_height {
+        row_permute.shuffle(&mut rng);
+
+        let start = (r*mark_width) as usize;
+        let end = ((r+1)*mark_width) as usize;
+
+        let row = &watermark[start..end];
+        let mut permuted_row = &mut permuted[start..end];
+        for (i, j) in row_permute.iter().map(|i| *i as usize).enumerate() {
+            permuted_row[i] = row[j];
+        }
+
+        key_1.extend(row_permute.iter());
+    }
+
+    let key_2: Vec<u8> = key_1
+        .iter()
+        .zip(variance.iter())
+        .map(|(k, p)| k ^ p)
+        .collect();
+
+    let mut extracted = Vec::with_capacity(watermark.len());
+    for r in 0..mark_height {
+
+        let start = (r*mark_width) as usize;
+        let end = ((r+1)*mark_width) as usize;
+
+        let key = &key_1[start..end];
+        let row = &permuted[start..end];
+        for j in key.iter().map(|i| *i as usize) {
+            extracted.push(if 0 == key_2[j] {0u8} else {255u8});
+        }
+    }
+
+    write_image(output, mark_width, mark_height, &extracted);
 }

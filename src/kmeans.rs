@@ -1,9 +1,9 @@
 use rand::prelude::*;
 use rayon::prelude::*;
 use block::*;
+use std::collections::HashMap;
 
-pub fn kmeans(k: usize, tol: f64, blocks: &Vec<Block>)
-    -> std::collections::HashMap<Block, std::vec::Vec<usize>>
+pub fn kmeans(k: usize, tol: f64, blocks: &Vec<Block>) -> HashMap<Block, std::vec::Vec<usize>>
 {
     use std::collections::HashMap;
 
