@@ -9,3 +9,11 @@ Set up and use the `pre-commit` hook which automates testing each time you commi
 ```
 $ ln -s ../../.pre-commit.sh .git/hooks/pre-commit
 ```
+
+To run the watermark extraction, use:
+
+```
+$ cargo run --release -- img/TrumanEatsLunchII.jpg img/smiley.jpg
+```
+
+This will extract `img/smiley.jpg` from `img/TrumanEatsLunchII.jpg`.
